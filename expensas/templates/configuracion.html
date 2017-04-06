@@ -1,0 +1,435 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    {% include "head.html" %}
+    <title>Configuración</title>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".select2").select2();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#numeros').DataTable( {
+                "order": [0, 'asc'],
+                "language": {
+                    "sProcessing":     "Procesando...",
+                    "sLengthMenu":     "Mostrar _MENU_ registros",
+                    "sZeroRecords":    "No se encontraron resultados",
+                    "sEmptyTable":     "Ninguna unidad cargada en el consorcio",
+                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix":    "",
+                    "sSearch":         "Buscar:",
+                    "sUrl":            "",
+                    "sInfoThousands":  ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst":    "Primero",
+                        "sLast":     "Último",
+                        "sNext":     "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
+            });
+        });
+    </script>
+    </head>
+<body onload="findTotal()">
+    {% include "nav.html" %}
+    <div id="page-wrapper" class="wrapper-bajado">
+        <div id="page-inner">
+            <div class="col-xs-12">
+                <h2 style="margin-left: 2%;">Configure el sistema para su propia comodidad:</h2> 
+            </div>
+        </div>
+        <div id="page-inner-cuerpo" class="col-xs-12">
+            <div class="row" >
+                <div class="col-lg-12">
+                    <form method="post">{% csrf_token %}
+                        <div class="col-lg-11">
+                            <div class="form-group">
+                                <label>Seleccione el Edificio / Complejo:</label>
+                                <select class="select2 form-control" name="selectDepartamento">
+                                    {% for edificio in edificios %}
+                                    <option value="{{ edificio.id }}">{{ edificio.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-1">
+                            <button type="submit" class="btn btn-primary" style="margin-top:25px;">Cargar</button>
+                        </div>
+                    </form>
+                    {% if edificioSeleccionado %}
+                    <ul class="tab" style="margin-top: 70px;">
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'TGastos')" id="defaultOpen">Tipos de gastos</a></li>
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'TUnidades')">Tipos de unidades</a></li>
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'Unidades')">Unidades y porcentuales</a></li>
+                    </ul>
+                    <div id="TUnidades" class="tabcontent">
+                        <h3>Agregue, modifique o elimine tipos de unidades en este consorcio:</h3>
+                        <table id="TiposUnidades" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if not tiposUnidades %}
+                                <tr><td>No se encontraron tipos de unidades en este consorcio</td></tr>
+                                {% else %}
+                                {% for tipoUnidad in tiposUnidades %}
+                                <tr id="TU{{ tipoUnidad.id }}">
+                                    <td>{{ tipoUnidad.nombre }}</td>
+                                    <td style="align:right;"><a target="_blank" href="http://{{ url }}/admin/expensas/tipodeunidad/{{ tipoUnidad.id }}/" class="btn btn-warning"><i class="fa fa-pencil-square-o"></i></a><btn class="btn btn-danger" onclick="eliminarTU({{ tipoUnidad.id }},'{{ tipoUnidad.nombre }}')" ><i class="fa fa-times"></i></btn></td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        <form method="post">{% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" id="nombreTU" class="form-control"/>
+                                <span class="input-group-btn">
+                                    <input type="hidden" id="edificio" name="edificio" value="{{ edificioSeleccionado.id }}">
+                                    <input type="submit" id="agregarTU" class="btn btn-success" value="Agregar Tipo de Unidad">
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="TGastos" class="tabcontent">
+                        <h3>Agregue, modifique o elimine conceptos de gastos y sus porcentuales con respecto a los tipos de unidades:</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Gastos A</th>
+                                    <th>Gastos B</th>
+                                    <th>Gastos C</th>
+                                    <th>Gastos D</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if not tiposGastos %}
+                                <tr><td>No se encontraron tipos de gastos en este consorcio</td></tr>
+                                {% else %}
+                                {% for tipoGasto in tiposGastos %}
+                                <tr id="TG{{tipoGasto.id}}">
+                                    <td>{{tipoGasto.id}}</td>
+                                    <td>{{tipoGasto.nombre}}</td>
+                                    <td><input class="form-control" id="{{tipoGasto.id}}A" type="number" min="0" max="100" value="{{tipoGasto.porcentajeA}}"></td>
+                                    <td><input class="form-control" id="{{tipoGasto.id}}B" type="number" min="0" max="100" value="{{tipoGasto.porcentajeB}}"></td>
+                                    <td><input class="form-control" id="{{tipoGasto.id}}C" type="number" min="0" max="100" value="{{tipoGasto.porcentajeC}}"></td>
+                                    <td><input class="form-control" id="{{tipoGasto.id}}D" type="number" min="0" max="100" value="{{tipoGasto.porcentajeD}}"></td>
+                                    <td><button type="submit" class="btn btn-primary" onclick="guardarTG({{ tipoGasto.id }})"><i class="fa fa-floppy-o"></i></button><btn class="btn btn-danger" onclick="eliminarTG({{ tipoGasto.id }},'{{ tipoGasto.nombre }}')" ><i class="fa fa-times"></i></btn></td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                                <tr>
+                                    <td><button class="btn btn-success" onclick="nuevoTG()"><i class="fa fa-plus"></i></button></td>
+                                    <td><input id="nomTG" class="form-control" type="text" placeholder="Nombre"></td>
+                                    <td><input id="porATG" class="form-control" type="number" min="0" max="100" placeholder="%A"></td>
+                                    <td><input id="porBTG" class="form-control" type="number" min="0" max="100" placeholder="%B"></td>
+                                    <td><input id="porCTG" class="form-control" type="number" min="0" max="100" placeholder="%C"></td>
+                                    <td><input id="porDTG" class="form-control" type="number" min="0" max="100" placeholder="%D"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="Unidades" class="tabcontent">
+                        <h3>Aqui apareceran las unidades del consorcio {{ edificioSeleccionado.nombre.capitalize }}</h3>
+                        <table id="numeros" class="display" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>PH</th>
+                                    <th>Depto</th>
+                                    <th>%A</th>
+                                    <th>%B</th>
+                                    <th>%C</th>
+                                    <th>%D</th>
+                                    <th>%E</th>
+                                    <th>%F</th>
+                                    <th>%G</th>
+                                    <th>%H</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for unidad, porcentuales in un_por %}
+                                <tr>
+                                    <th>{{ unidad.ph }}</th>
+                                    <th>{{ unidad.depto }}</th>
+                                    {% for porcentual in porcentuales %}
+                                    <th><input class="form-control" name="{{ porcentual.gasto }}" type="number" value="{{ porcentual.porcentual }}"></th>
+                                    {% endfor %}
+                                    <th><btn class="btn btn-warning"><i class="fa fa-pencil-square-o"></i></btn></th>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                    <th></th>
+                                    <th>Totales</th>
+                                    <th><input name="totA" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th><input name="totB" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th><input name="totC" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th><input name="totD" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th><input name="totE" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th><input name="totF" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th><input name="totG" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th><input name="totH" class="form-control" type="number" disabled placeholder="Total"></th>
+                                    <th></th>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <center><a style="margin-top: 15px;" class="btn btn-success" target="_blank" href="#">Agregar unidad</a></center>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+
+    //For doing AJAX post
+
+    //When submit is clicked
+    $("#agregarTU").click(function(e) {
+
+        //Prevent default submit. Must for Ajax post.Beginner's pit.
+        e.preventDefault();
+
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+
+        //Collect data from fields
+        var addTU = "Tipo de unidad";
+        var nombre = $('#nombreTU').val();
+        var edificio = $('#edificio').val();
+        var table = document.getElementById("TiposUnidades")
+
+        //This is the Ajax post.Observe carefully. It is nothing but details of where_to_post,what_to_post
+        //Send data  
+        $.ajax({
+            url : '/configuracion/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken,
+                    addTU : addTU,
+                    nombre : nombre,
+                    edificio : edificio,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                alert(json['error']);
+
+                if (json['id']){
+                    var row = table.insertRow();
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+
+                    row.id = "TU"+json["id"];
+                    cell1.innerHTML = nombre;
+                    cell2.innerHTML = '<td style="align:right;"><a target="_blank" href="http://{{ url }}/admin/expensas/tipodeunidad/{{ tipoUnidad.id }}/" class="btn btn-warning"><i class="fa fa-pencil-square-o"></i></a><btn class="btn btn-danger" onclick="eliminarTU('+json["id"]+',\''+nombre+'\')" ><i class="fa fa-times"></i></btn></td>';
+
+                    document.getElementById("nombreTU").value = "";
+                }else{}
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    });
+
+    function eliminarTU(id,nombre){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var TU = "Tipo Unidad";
+        var r = confirm("De verdad desea eliminar el tipo de unidad: "+nombre);
+
+        if (r == true) {
+            $.ajax({
+                url : '/configuracion/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        id : id,
+                        TU : TU,
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    alert(json['error']);
+                    var myNode = document.getElementById("TU"+json['id']);
+                    while (myNode.firstChild) {
+                        myNode.removeChild(myNode.firstChild);
+                    }
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }else{}
+    }
+
+    function guardarTG(id){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var porA = $('#'+String(id)+'A').val();
+        var porB = $('#'+String(id)+'B').val();
+        var porC = $('#'+String(id)+'C').val();
+        var porD = $('#'+String(id)+'D').val();
+        var TG = "Tipo de gasto";
+
+        $.ajax({
+            url : '/configuracion/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken, 
+                    id : id,
+                    porA : porA,
+                    porB : porB,
+                    porC : porC,
+                    porD : porD,
+                    TG : TG,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                alert(json['error']);
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+
+    }
+
+    function nuevoTG(){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var nom = $('#nomTG').val();
+        var porA = $('#porATG').val();
+        var porB = $('#porBTG').val();
+        var porC = $('#porCTG').val();
+        var porD = $('#porDTG').val();
+        var nTG = $('#edificio').val();
+
+        $.ajax({
+            url : '/configuracion/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken,
+                    nombre : nom,
+                    porA : porA,
+                    porB : porB,
+                    porC : porC,
+                    porD : porD,
+                    nTG : nTG,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                alert(json['error']);
+                setTimeout(function () {
+                    window.location.reload(1);
+                }, 2000);
+
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+
+    }
+
+    function eliminarTG(id,nombre){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var rmvTG = "Tipo Gasto";
+        var r = confirm("De verdad desea eliminar el tipo de gasto: "+nombre);
+
+        if (r == true) {
+            $.ajax({
+                url : '/configuracion/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        id : id,
+                        rmvTG : rmvTG,
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    alert(json['error']);
+                    var myNode = document.getElementById("TG"+json['id']);
+                    while (myNode.firstChild) {
+                        myNode.removeChild(myNode.firstChild);
+                    }
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }else{}
+    }
+
+    function findTotal(){
+        var array = ["A","B","C","D","E","F","G","H"]
+        for(var j=0;j<array.length;j++){
+            var arr = document.getElementsByName(array[j]);
+            var tot=0;
+            for(var i=0;i<arr.length;i++){
+                if(parseInt(arr[i].value))
+                    tot += parseInt(arr[i].value);
+            }
+            document.getElementsByName("tot"+array[j]).value = tot;
+        }
+    }
+</script>

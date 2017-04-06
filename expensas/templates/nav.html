@@ -1,0 +1,23 @@
+{% load staticfiles %}
+<nav class="navbar-default navbar-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul class="nav" id="main-menu" >
+            <div style="background: #697DFF; color:#ffffff;margin-bottom:1%;">
+                <center><a href="/" class="cd-logo"><img style="margin-top: 10%; margin-left: 1%; height: 125px; width: 125px;" src="{% static 'images/logo.png' %}" alt="Logo"></a><br>Bienvenido/a, <span class="resaltado">{{ user.get_full_name }}</span></center>
+                <br>
+            </div>
+            <li><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-building-o"></i> Consorcios <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                    <li role="presentation"><a class="active-menu" role="menuitem" tabindex="-1" href="/"><i class="fa fa-balance-scale"></i> Expensas</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="/espaciosComunes"><i class="fa fa-users"></i> Espacios comunes</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="/numerosUtiles"><i class="fa fa-phone"></i> Números utiles</a></li>
+                    <li role="presentation"><a role="menuitem" tabindex="-1" href="/archivosImportantes"><i class="fa fa-file-o"></i> Archivos importantes</a></li>
+                </ul>
+            </li>
+            <li><a href="/mensajes"><i class="fa fa-envelope-o"></i> Mensajes<br /> ({{mensajesNoLeidos}} No Leídos)</a></li>
+            <li><a href="/enviar_mensaje"><i class="fa fa-envelope-o"></i> Enviar Mensaje<br /> a Administración</a></li>
+            <li><a href="http://criscioneyasociados.com.ar" target="_blank"><i class="fa fa-newspaper-o"></i> Noticias</a></li>
+            <li><a class="alerta" href="/logout"><i class="fa fa-sign-out"></i>Salir</a></li>
+        </ul>
+    </div>
+</nav>

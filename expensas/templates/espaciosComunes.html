@@ -1,0 +1,312 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <link href="{% static 'images/logo.png' %}" rel='shortcut icon' type='image/png'>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Espacios comunes</title>
+        <script src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
+        <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
+        <link href='http://fonts.googleapis.com/css?family=Josefin+Slab:400,700' rel='stylesheet' type='text/css' />
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        <script>
+            $.datepicker.regional['es'] = {
+                closeText: 'Cerrar',
+                prevText: '<Ant',
+                nextText: 'Sig>',
+                currentText: 'Hoy',
+                monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+                dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                dayNamesShort: ['Dom','Lun','Mar','Mié','Juv','Vie','Sáb'],
+                dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','Sá'],
+                weekHeader: 'Sm',
+                dateFormat: 'dd/mm/yy',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: ''
+            };
+            $.datepicker.setDefaults($.datepicker.regional['es']);
+            $( function() {
+                $( "#datepicker" ).datepicker({ minDate: 0});
+            } );
+        </script>
+    </head>
+    <body>
+        <nav class="navbar-default navbar-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav" id="main-menu" >
+                    <div style="background: #697DFF; color:#ffffff;margin-bottom:1%;">
+                        <center><a href="/" class="cd-logo"><img style="margin-top: 10%; margin-left: 1%; height: 125px; width: 125px;" src="{% static 'images/logo.png' %}" alt="Logo"></a><br>Bienvenido/a, <span class="resaltado">{{ user.get_full_name }}</span></center>
+                        <br>
+                    </div>
+                    {% if user.is_staff %}
+                    <li><a class="active-menu" href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-building-o"></i> Consorcios <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/"><i class="fa fa-balance-scale"></i> Expensas</a></li>
+                            <li role="presentation"><a class="active-menu" role="menuitem" tabindex="-1" href="/espaciosComunes"><i class="fa fa-users"></i> Espacios comunes</a></li>
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/numerosUtiles"><i class="fa fa-phone"></i> Números utiles</a></li>
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/archivosImportantes"><i class="fa fa-file-o"></i> Archivos importantes</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="/mensajes"><i class="fa fa-envelope-o"></i> Mensajes<br /> ({{mensajesNoLeidos}} No Leídos)</a></li>
+                    <li><a href="/enviar_mensaje"><i class="fa fa-envelope-o"></i> Enviar Mensaje</a></li>
+                    <li><a href="/admin" target="_blank"><i class="fa fa-plus"></i> Cargar Edificios, Departamentos y/o Propietarios</a></li>
+                    {% else %}
+                    <li><a class="active-menu" href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-building-o"></i> Consorcios <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/"><i class="fa fa-balance-scale"></i> Expensas</a></li>
+                            <li role="presentation"><a class="active-menu" role="menuitem" tabindex="-1" href="/espaciosComunes"><i class="fa fa-users"></i> Espacios comunes</a></li>
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/numerosUtiles"><i class="fa fa-phone"></i> Números utiles</a></li>
+                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/archivosImportantes"><i class="fa fa-file-o"></i> Archivos importantes</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="/mensajes"><i class="fa fa-envelope-o"></i> Mensajes<br /> ({{mensajesNoLeidos}} No Leídos)</a></li>
+                    <li><a href="/enviar_mensaje"><i class="fa fa-envelope-o"></i> Enviar Mensaje<br /> a Administración</a></li>
+                    <li><a href="http://criscioneyasociados.com.ar" target="_blank"><i class="fa fa-newspaper-o"></i> Noticias</a></li>
+                    {% endif %}
+                    <li><a class="alerta" href="/logout"><i class="fa fa-sign-out"></i>Salir</a></li>
+
+                </ul>
+            </div>
+        </nav>
+        <div id="page-wrapper" class="wrapper-bajado">
+            <div class="alert alert-success" id="exito" style="display:none;">
+                <strong>Guardado!</strong> La reserva se ha guardado con exito.
+            </div>
+            {% if exito or error %}
+            <div class="col-lg-12 btn btn-{% if exito %}success{% elif error %}danger{% endif %}">
+                <p>{% if exito %}Los cambios han sido guardados con éxito!{% elif error %}Ha ocurrido un error en el proceso, por favor verifique los datos y vuelva a intentarlo.{% endif %}</p>
+            </div>
+            {% endif %}
+            {% if user.is_staff %}
+            <div id="page-inner-cuerpo" class="col-xs-12">
+                <div class="row" >
+                    <div class="col-lg-12">
+                        <h2 style="margin-bottom: 30px; margin-top: 15px;">Reservas de espacios comunes:</h2> 
+                        <div style="overflow:hidden;">
+                            {% if not reservas %}
+                            <h2>No existen reservas</h2> 
+                            {% else %}
+                            <div class="form-group">
+                                <div class="row">
+                                    <table style="margin-left:20px;overflow:auto;" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Espacio</th>
+                                                <th>Consorcio</th>
+                                                <th>Fecha</th>
+                                                <th>Hora</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for reserva in reservas %}
+                                            <tr>
+                                                <td>{{ reserva.id }}</td>
+                                                <td>{{ reserva.persona.username }}</td>
+                                                <td>{{ reserva.espacioComun.nombre }}</td>
+                                                <td>{{ reserva.espacioComun.edificio.nombre }}</td>
+                                                <td>{{ reserva.fecha }}</td>
+                                                <td>{{ reserva.hora }}:00hs</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <center><a class="btn btn-success" target="_blank" href="http://{{ url }}/admin/expensas/espaciocomun/add/">Agregar espacio comun</a></center>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div id="page-inner-cuerpo" class="col-xs-12">
+                <div class="row" >
+                    <div class="col-lg-12">
+                        <h2 style="margin-bottom: 30px; margin-top: 15px;">Consultar disponibilidad de espacios comunes:</h2> 
+                        <div style="overflow:hidden;">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div style="background: #F3F3F3; border-radius: 20px; padding: 10px;">
+                                            <div class="input-group date">
+                                                <center>
+                                                    <form method="POST">
+                                                        {% csrf_token %}
+                                                        <p>Fecha deseada: <input type="text" {% if fecha %} value="{{ fecha }}" {% endif %}name="fecha" id="datepicker">
+                                                            Hora: <select name="hora" style="width: 85px; overflow-y: scroll;">
+                                                            <option value="0">00:00hs</option>
+                                                            <option value="1">01:00hs</option>
+                                                            <option value="2">02:00hs</option>
+                                                            <option value="3">03:00hs</option>
+                                                            <option value="4">04:00hs</option>
+                                                            <option value="5">05:00hs</option>
+                                                            <option value="6">06:00hs</option>
+                                                            <option value="7">07:00hs</option>
+                                                            <option value="8">08:00hs</option>
+                                                            <option value="9">09:00hs</option>
+                                                            <option value="10">10:00hs</option>
+                                                            <option value="11">11:00hs</option>
+                                                            <option value="12">12:00hs</option>
+                                                            <option value="13">13:00hs</option>
+                                                            <option value="14">14:00hs</option>
+                                                            <option value="15">15:00hs</option>
+                                                            <option value="16">16:00hs</option>
+                                                            <option value="18">18:00hs</option>
+                                                            <option value="19">19:00hs</option>
+                                                            <option value="20">20:00hs</option>
+                                                            <option value="21">21:00hs</option>
+                                                            <option value="22">22:00hs</option>
+                                                            <option value="23">23:00hs</option>
+                                                            </select></p>
+                                                        <input type="submit" name="consultar" value="Consultar disponibilidad" style="margin-top:10%;margin-left: 10%; margin-bottom:15px;" class="btn btn-success"/>
+                                                    </form>
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div style="background: #F3F3F3; border-radius: 20px; padding: 10px;">
+                                            {% if fecha == None and hora == None %}
+                                            <h1>Ingrese una fecha a buscar...</h1>
+                                            {% else %}
+                                            <h2><u>Espacios comunes de los consorcios a los que pertences:</u></h2>
+                                            <h3 style="color:green;">Dia: {{ fecha }} Hora: {{ hora }}:00hs</h3>
+                                            {% endif %}
+                                            {% if estados %}
+                                            {% for espacio, estado in estados %}
+                                            <div id="espacio{{ espacio.id }}">
+                                                <h3>{{ espacio.nombre }}:</h3>
+                                                <p>Consorcio: {{ espacio.edificio.nombre }}</p>
+                                                <p>Descripcion: {{ espacio.descripcion }}</p>
+                                                <center>
+                                                    {% if estado == True %}
+                                                    <!-- Modal -->
+                                                    <div class="modal fade" id="{{ espacio.id }}" role="dialog">
+                                                        <div class="modal-dialog">
+                                                            <!-- Modal content-->
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                    <h4 class="modal-title">Reservar {{ espacio.nombre }}:</h4>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <form method="post">
+                                                                        <input type="hidden" id="hora" value="{{ hora }}">
+                                                                        <input type="hidden" id="fecha" value="{{ fecha }}">
+                                                                        <input type="hidden" id="id_espacio" value="{{ espacio.id }}">
+                                                                        Cantidad de horas a reservar: <input type="number" style="width: 40px;" id="cant_horas" value="0" min="0" max="24">
+
+                                                                        </div>
+                                                                    <div class="modal-footer">
+                                                                        <input class="btn btn-success" type="submit" id="submit" >
+                                                                        </form>
+                                                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#{{ espacio.id }}">Reservar</button>
+                                                    {% else %}
+                                                    <h4 style="color:red;">Ocupado por {{ estado.persona.username }}</h4>
+                                                    {% endif %}
+                                                </center>
+                                            </div>
+                                            {% endfor %}
+                                            {% elif estados == "Vacio" %}
+                                            <h1>No tiene espacios comunes en sus consorcios...</h1>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </body>
+    <script>
+        //For getting CSRF token
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+        //For doing AJAX post
+
+        //When submit is clicked
+        $("#submit").click(function(e) {
+
+            //Prevent default submit. Must for Ajax post.Beginner's pit.
+            e.preventDefault();
+
+            //Prepare csrf token
+            var csrftoken = getCookie('csrftoken');
+
+
+            //Collect data from fields
+            var hora = $('#hora').val();
+            var fecha = $('#fecha').val();
+            var id_espacio = $('#id_espacio').val();
+            var cant_horas = $('#cant_horas').val();
+
+            //This is the Ajax post.Observe carefully. It is nothing but details of where_to_post,what_to_post
+            //Send data  
+            $.ajax({
+                url : '/guardarReserva/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        hora : hora,
+                        fecha : fecha,
+                        id_espacio : id_espacio,
+                        cant_horas : cant_horas
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    $('#'+json['modal']).modal('hide');
+                    alert(json['error']);
+                    setTimeout(function () {
+                        window.location.reload(1);
+                    }, 3000);
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        });
+    </script>
+</html>

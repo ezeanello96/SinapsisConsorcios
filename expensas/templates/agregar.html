@@ -1,0 +1,701 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    {% include "head.html" %}
+    <title>Agregar</title>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".select2").select2();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#unidades').DataTable( {
+                "order": [0, 'asc'],
+                "language": {
+                    "sProcessing":     "Procesando...",
+                    "sLengthMenu":     "Mostrar _MENU_ registros",
+                    "sZeroRecords":    "No se encontraron resultados",
+                    "sEmptyTable":     "Ninguna unidad cargada en el consorcio",
+                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix":    "",
+                    "sSearch":         "Buscar:",
+                    "sUrl":            "",
+                    "sInfoThousands":  ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst":    "Primero",
+                        "sLast":     "Último",
+                        "sNext":     "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
+            });
+            $('#usuarios').DataTable( {
+                "order": [0, 'asc'],
+                "language": {
+                    "sProcessing":     "Procesando...",
+                    "sLengthMenu":     "Mostrar _MENU_ registros",
+                    "sZeroRecords":    "No se encontraron resultados",
+                    "sEmptyTable":     "Ninguna unidad cargada en el consorcio",
+                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix":    "",
+                    "sSearch":         "Buscar:",
+                    "sUrl":            "",
+                    "sInfoThousands":  ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst":    "Primero",
+                        "sLast":     "Último",
+                        "sNext":     "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
+            });
+        });
+    </script>
+    </head>
+<body>
+    {% include "nav.html" %}
+    <div id="page-wrapper" class="wrapper-bajado">
+        <div id="page-inner">
+            <div class="col-xs-12">
+                <h2 style="margin-left: 2%;">Agregue consorcios, usuarios y unidades:</h2> 
+            </div>
+        </div>
+        <div id="page-inner-cuerpo" class="col-xs-12">
+            <form style="margin-bottom: 80px; margin-top: 10px;" method="post">{% csrf_token %}
+                <div class="col-lg-11">
+                    <div class="form-group">
+                        <label>Seleccione un Edificio para ver las unidades:</label>
+                        <select class="select2 form-control" name="selectDepartamento">
+                            {% for edificio in edificios %}
+                            <option value="{{ edificio.id }}">{{ edificio.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-1">
+                    <button type="submit" class="btn btn-primary" style="margin-top:25px;">Cargar</button>
+                </div>
+            </form>
+            <div class="row" >
+                <div class="col-lg-12">
+                    <ul class="tab">
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'VerUnidades')" id="defaultOpen">Ver unidades</a></li>
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'AddUnidades')" id="AddUnidad">Agregar unidades</a></li>
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'AddUsuarios')">Agregar usuarios</a></li>
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'VerUsuarios')">Ver usuarios</a></li>
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'AddConsorcios')">Agregar consorcios</a></li>
+                    </ul>
+                    <div id="VerUnidades" class="tabcontent">
+                        <h3>Aqui vera las unidades del Edificio que seleccine...</h3><br>
+                        {% if edificioSeleccionado %}
+                        <input type="hidden" id="edificio" value="{{ edificioSeleccionado.id }}">
+                        <table id="unidades" class="display" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>PH</th>
+                                    <th>Depto</th>
+                                    <th>Propietario</th>
+                                    <th>Inquilino</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for unidad in unidades %}
+                                <tr id="unidad{{ unidad.id }}">
+                                    <td>{{ unidad.ph }}</td>
+                                    <td>{{ unidad.depto }}</td>
+                                    <td>{{ unidad.propietario.get_full_name }}</td>
+                                    <td>{{ unidad.inquilino.get_full_name }}</td>
+                                    <td><a class="btn btn-warning" onclick="modificarUn('{{ unidad.id }}', '{{ unidad.propietario.id }}', {% if not unidad.inquilino.id %}'None',{% else %}'{{ unidad.inquilino.id }}',{% endif %} '{{ unidad.ph }}', '{{ unidad.depto }}');"><i class="fa fa-pencil-square-o"></i></a> <btn class="btn btn-danger" onclick="eliminarUn('{{ unidad.id }}','{{ unidad.ph }}')" ><i class="fa fa-times"></i></btn></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <center><a style="margin-top: 15px; margin-bottom: 15px;" class="btn btn-success" onclick="openCity(event, 'AddUnidades'); $('#AddUnidad').addClass('active');">Agregar unidad</a></center>
+                        <div id="modificarUnidad" style="height: 100px; margin-top: 30px; display: none;">
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label>PH:</label>
+                                    <input class="form-control" type="text" id="ModPH">
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label>Depto:</label>
+                                    <input class="form-control" type="text" id="ModDepto">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Propietario:</label>
+                                    <select class="select2 form-control" style="width:100%;" id="ModPropietario">
+                                        {% for persona in personas %}
+                                        <option value="{{ persona.id }}">{{ persona.get_full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Inquilino:</label>
+                                    <select class="select2 form-control" style="width:100%;" id="ModInquilino">
+                                        <option value="None">Ninguno</option>
+                                        {% for persona in personas %}
+                                        <option value="{{ persona.id }}">{{ persona.get_full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="boton" class="col-lg-2">
+                                <button  style="margin-top:20px;" type="submit" class="btn btn-primary" onclick="addUnidad()"><i class="fa fa-floppy-o"></i>  Guardar</button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div id="AddUnidades" class="tabcontent">
+                        {% if not edificioSeleccionado %}
+                        <h3>Aqui puede agregar unidades al Consorcio que seleccione...</h3><br>
+                        {% elif edificioSeleccionado %}
+                        <h3>Aqui puede agregar unidades al Consorcio {{ edificioSeleccionado.nombre.capitalize }}:</h3><br>
+                        <div style="height: 200px; margin-top: 10px;">
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label>PH:</label>
+                                    <input class="form-control" type="text" id="PH" placeholder="Ej.:001">
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label>Depto:</label>
+                                    <input class="form-control" type="text" id="Depto" placeholder="Ej.:1A">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Propietario:</label>
+                                    <select class="select2 form-control" style="width:100%;" id="Propietario">
+                                        {% for persona in personas %}
+                                        <option value="{{ persona.id }}">{{ persona.get_full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label style="margin-top:25px;">Tipo de unidad:</label>
+                                    <select class="select2 form-control" style="width:100%;" id="TipoUnidad">
+                                        {% for TipoUnidad in TUs %}
+                                        <option value="{{ TipoUnidad.id }}">{{ TipoUnidad.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Inquilino:</label>
+                                    <select class="select2 form-control" style="width:100%;" id="Inquilino">
+                                        <option value="None">Ninguno</option>
+                                        {% for persona in personas %}
+                                        <option value="{{ persona.id }}">{{ persona.get_full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label style="margin-top:25px;">Porcentual (%):</label>
+                                    <input class="form-control" id="porcentual" type="number" placeholder="Ej.:%8.4">
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <button  style="margin-top:62px;" type="submit" class="btn btn-primary" onclick="addUnidad()"><i class="fa fa-plus"></i> Agregar</button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div id="AddUsuarios" class="tabcontent">
+                        {% if not edificioSeleccionado %}
+                        <h3>Aqui puede agregar usuarios al sistema, para luego relacionarlos con una unidad:</h3><br>
+                        {% elif edificioSeleccionado %}
+                        <h3>Aqui puede agregar usuarios al sistema:</h3>
+                        <p>Los campos en rojo son requeridos...</p><br>
+                        <div style="height: 250px; margin-top: 10px;">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Nombre/s:</label>
+                                    <input onchange="$(this).css('background-color', 'white');" class="form-control requerido" type="text" id="nombre" placeholder="Jorge Leandro">
+                                    <label style="margin-top:25px;">Apellido/s:</label>
+                                    <input class="form-control requerido" type="text" id="apellido" placeholder="Perez">
+                                    <label style="margin-top:25px;">Dirección:</label>
+                                    <input class="form-control" type="text" id="dir" placeholder="Obispo Trejo 540">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Nombre de usuario:</label>
+                                    <input class="form-control requerido" type="text" id="usuario" placeholder="jorgeperez86">
+                                    <label style="margin-top:25px;">Dirección de email:</label>
+                                    <input class="form-control requerido" type="email" id="email" placeholder="jorgeperez@gmail.com">
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <label>Telefono:</label>
+                                    <input class="form-control" type="text" id="tel" placeholder="0351 443284">
+                                    <label style="margin-top:25px;">Telefono 2:</label>
+                                    <input class="form-control" type="email" id="tel2" placeholder="0351 443284">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Contraseña:</label>
+                                    <input class="form-control requerido" type="password" id="pass" placeholder="jorgito86">
+                                    <label style="margin-top:25px;">Verificar contraseña:</label>
+                                    <input class="form-control requerido" type="password" id="ver_pass" placeholder="jorgito86">
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <center><button  style="margin-top:28px; width: 100%; height: 50px;" type="submit" class="btn btn-primary" onclick="addUsuario()"><i class="fa fa-plus"></i> Agregar</button></center></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div id="VerUsuarios" class="tabcontent">
+                        <h3>Aqui puede ver los usuarios del sistema:</h3><br>
+                        <table id="usuarios" class="display" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre/s</th>
+                                    <th>Apellido/s</th>
+                                    <th>Usuario</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for persona in personas %}
+                                <tr id="usuario{{ persona.id }}">
+                                    <td>{{ persona.id }}</td>
+                                    <td>{{ persona.first_name }}</td>
+                                    <td>{{ persona.last_name }}</td>
+                                    <td>{{ persona.get_username }}</td>
+                                    <td><btn class="btn btn-warning" onclick="modificarUser({{ persona.id }})"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="eliminarUser({{ persona.id }})"><i class="fa fa-times"></i></btn> <a class="btn btn-primary" target="_blank" href="http://{{ url }}/admin/auth/user/{{ persona.id }}/password/">Cambiar contraseña</a></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div id="modificarUsuario" style="height: 250px; margin-top: 30px; display: none;">
+                            <div class="col-lg-5">
+                                <div class="form-group">
+                                    <label>Nombre/s:</label>
+                                    <input class="form-control" type="text" id="modNombre">
+                                    <label style="margin-top:25px;">Apellido/s:</label>
+                                    <input class="form-control" type="text" id="modApellido">
+                                    <label style="margin-top:25px;">Dirección:</label>
+                                    <input class="form-control" type="text" id="modDir">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Nombre de usuario:</label>
+                                    <input class="form-control" type="text" id="modUsuario">
+                                    <label style="margin-top:25px;">Dirección de email:</label>
+                                    <input class="form-control" type="email" id="modEmail">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-group">
+                                    <label>Telefono:</label>
+                                    <input class="form-control" type="text" id="modTel">
+                                    <label style="margin-top:25px;">Telefono 2:</label>
+                                    <input class="form-control" type="email" id="modTel2">
+                                </div>
+                            </div>
+                            <div class="col-lg-7" id="modUserBot">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="AddConsorcios" class="tabcontent">
+                    <h3>Aqui puede agregar conosorcios al sistema:</h3><br>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
+<script>
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+
+    function addUnidad(){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var edificio = $('#edificio').val();
+        var porcentual = $('#porcentual').val();
+        var PH = $('#PH').val();
+        var Depto = $('#Depto').val();
+        var propietario = $('#Propietario').val();
+        var inquilino = $('#Inquilino').val();
+        var tipoUnidad = $('#TipoUnidad').val();
+
+        var table = document.getElementById("unidades");
+
+        if(porcentual == '' || PH == '' || Depto == ''){
+            alert("Debe completar los campos de PH, porcentual y Depto")
+        }else{
+            $.ajax({
+                url : '/agregar/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        edificio : edificio,
+                        porcentual : porcentual,
+                        PH : PH,
+                        Depto : Depto,
+                        propietario : propietario,
+                        inquilino : inquilino,
+                        tipoUnidad : tipoUnidad,
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    alert(json['error']);
+                    if(json['prop']){
+                        $('#edificio').val('');
+                        $('#porcentual').val('');
+                        $('#PH').val('');
+                        $('#Depto').val('');
+
+                        var row = table.insertRow();
+                        var cell1 = row.insertCell(0);
+                        var cell2 = row.insertCell(1);
+                        var cell3 = row.insertCell(2);
+                        var cell4 = row.insertCell(3);
+                        var cell5 = row.insertCell(4);
+
+                        cell1.innerHTML = PH;
+                        cell2.innerHTML = Depto;
+                        cell3.innerHTML = json['prop'];
+                        cell4.innerHTML = json['inq'];
+                        cell5.innerHTML = '<a class="btn btn-warning" onclick="modificarUn('+json["unidad"]+')"><i class="fa fa-pencil-square-o"></i></a>';
+                    }else{}},
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }
+    }
+
+    function modificarUn(idUn, propId, inqId, ph, depto){
+        $("#ModPropietario").select2('val',propId);
+        $("#ModInquilino").select2('val',inqId);
+        document.getElementById("ModDepto").value = depto;
+        document.getElementById("ModPH").value = ph;
+
+        document.getElementById("boton").innerHTML = '<button  style="margin-top:20px;" type="submit" class="btn btn-primary" onclick="guardarUn('+idUn+')"><i class="fa fa-floppy-o"></i>  Guardar</button>'
+
+        document.getElementById("modificarUnidad").style.display = 'block';
+        $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
+    }
+
+    function guardarUn(id){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var depto = $('#ModDepto').val();
+        var ph = $('#ModPH').val();
+        var inq = $('#ModInquilino').val();
+        var prop = $('#ModPropietario').val();
+        var GU = "Guardar Unidad";
+
+        $.ajax({
+            url : '/agregar/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken, 
+                    id : id,
+                    Depto: depto,
+                    PH : ph,
+                    propietario : prop,
+                    inquilino : inq,
+                    GU : GU,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                alert(json['error']);
+                if (json['unidad']) {
+                    var newRow = '<tr id="unidad'+json['unidad'].id+'"><td>'+json['unidad'].ph+'</td><td>'+json['unidad'].depto+'</td><td>'+json['unidad'].propietario.nombre+'</td><td>'+json['unidad'].inquilino.nombre+'</td><td><a class="btn btn-warning" onclick="modificarUn(\''+json['unidad'].id+'\', \''+json['unidad'].propietario.id+'\',\''+json['unidad'].inquilino.id+'\',\''+json['unidad'].ph+'\',\''+json['unidad'].depto+'\');"><i class="fa fa-pencil-square-o"></i></a><btn class="btn btn-danger" onclick="eliminarUn('+json['unidad'].id+','+json['unidad'].ph+')" ><i class="fa fa-times"></i></btn></td></tr>';
+                    $('#unidad'+json['unidad'].id).replaceWith(newRow);
+                    document.getElementById("modificarUnidad").style.display = 'none';
+                }else{}
+
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+
+    }
+
+    function eliminarUn(id, ph){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var EU = "Eliminar Unidad";
+        var r = confirm("De verdad desea eliminar la unidad con PH: "+ph);
+
+        if (r == true) {
+            $.ajax({
+                url : '/agregar/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        id : id,
+                        EU : EU,
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    alert(json['error']);
+                    var myNode = document.getElementById("unidad"+id);
+                    while (myNode.firstChild) {
+                        myNode.removeChild(myNode.firstChild);
+                    }
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }else{}
+    }
+
+    function addUsuario(){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var nombre = $('#nombre').val();
+        var apellido = $('#apellido').val();
+        var user = $('#usuario').val();
+        var email = $('#email').val();
+        var dir = $('#dir').val();
+        var tel = $('#tel').val();
+        var tel2 = $('#tel2').val();
+        var pass = $('#pass').val();
+        var ver_pass = $('#ver_pass').val();
+        var edificio = $('#edificio').val();
+
+        var table = document.getElementById("usuarios");
+
+        if(nombre == '' || apellido == '' || user == '' || email == '' || pass == '' || ver_pass == ''){
+            alert("Complete todos los campos requeridos para continuar...")
+        }else{
+            if(pass == ver_pass){
+                $.ajax({
+                    url : '/agregar/', // the endpoint,commonly same url
+                    type : "POST", // http method
+                    data : { csrfmiddlewaretoken : csrftoken, 
+                            nombre : nombre,
+                            apellido : apellido,
+                            user : user,
+                            email : email,
+                            dir : dir,
+                            tel : tel,
+                            tel2 : tel2,
+                            pass : pass,
+                            addUser : "Agregar usuario",
+                            edificio : edificio,
+                           }, // data sent with the post request
+
+                    // handle a successful response
+                    success : function(json) {
+                        //console.log(json); // another sanity check
+                        //On success show the data posted to server as a message
+                        alert(json['error']);
+                        if(json['persona']){
+                            $('#nombre').val('');
+                            $('#apellido').val('');
+                            $('#usuario').val('');
+                            $('#email').val('');
+                            $('#dir').val('');
+                            $('#tel').val('');
+                            $('#tel2').val('');
+                            $('#pass').val('');
+                            $('#ver_pass').val('');
+
+                            var row = table.insertRow();
+                            var cell1 = row.insertCell(0);
+                            var cell2 = row.insertCell(1);
+                            var cell3 = row.insertCell(2);
+                            var cell4 = row.insertCell(3);
+                            var cell5 = row.insertCell(4);
+
+                            cell1.innerHTML = json['persona'].id;
+                            cell2.innerHTML = json['persona'].nombre;
+                            cell3.innerHTML = json['persona'].apellido;
+                            cell4.innerHTML = json['persona'].user;
+                            cell5.innerHTML = '<btn class="btn btn-warning" onclick="modificarUser(\''+json['persona'].id+'\')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="eliminarUser(\''+json['persona'].id+'\')"><i class="fa fa-times"></i></btn> <a class="btn btn-primary" target="_blank" href="http://\''+json['url']+'\'/admin/auth/user/\''+json['persona'].id+'\'/password/">Cambiar contraseña</a>';
+                        }else{}},
+
+                    // handle a non-successful response
+                    error : function(xhr,errmsg,err) {
+                        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                    }
+                });
+            }else{alert("Las contraseñas no coinciden, por favor vuelva a escribirlas...");}
+
+        }
+    }
+
+    function modificarUser(id){
+
+        var csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url : '/agregar/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken, 
+                    modUser : "Modificar usuario",
+                    id : id,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                if(json['persona']){
+                    $('#modNombre').val(json['persona'].nombre);
+                    $('#modApellido').val(json['persona'].apellido);
+                    $('#modUsuario').val(json['persona'].user);
+                    $('#modEmail').val(json['persona'].email);
+                    $('#modDir').val(json['persona'].dir);
+                    $('#modTel').val(json['persona'].tel);
+                    $('#modTel2').val(json['persona'].tel2);
+
+                    document.getElementById("modUserBot").innerHTML = '<button  style="margin-top:28px; width: 100%; height: 50px;" type="submit" class="btn btn-primary" onclick="guardarUsuario(\''+id+'\')"><i class="fa fa-floppy-o"></i> Guardar</button>';
+
+                    document.getElementById("modificarUsuario").style.display = 'block';
+                    $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
+                    
+                }else{alert("Error los datos de la persona no se han podido encontrar...");}},
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    }
+    
+    function guardarUsuario(id){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+        var r = confirm("De verdad desea modificar el usuario con ID: "+id);
+        
+        if (r == true) {
+        var data = { csrfmiddlewaretoken : csrftoken, 
+                    id : id,
+                    nombre : $('#modNombre').val(),
+                    apellido : $('#modApellido').val(),
+                    username : $('#modUsuario').val(),
+                    email : $('#modEmail').val(),
+                    dir : $('#modDir').val(),
+                    tel : $('#modTel').val(),
+                    tel2 : $('#modTel2').val(),
+                    guaUser : "Guardar Usuario",
+                   };
+
+        $.ajax({
+            url : '/agregar/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : data, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                alert(json['error']);
+                if (json['persona']) {
+                    var newRow = '<tr id="usuario'+json['persona'].id+'"><td>'+json['persona'].id+'</td><td>'+json['persona'].nombre+'</td><td>'+json['persona'].apellido+'</td><td>'+json['persona'].user+'</td><td><btn class="btn btn-warning" onclick="modificarUser(\''+json['persona'].id+'\')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="eliminarUser(\''+json['persona'].id+'\')"><i class="fa fa-times"></i></btn> <a class="btn btn-primary" target="_blank" href="http://\''+json['url']+'\'/admin/auth/user/\''+json['persona'].id+'\'/password/">Cambiar contraseña</a></td></tr>';
+                    $('#usuario'+json['persona'].id).replaceWith(newRow);
+                    document.getElementById("modificarUsuario").style.display = 'none';
+                }else{}
+
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });}else{}
+
+    }
+    
+    function eliminarUser(id){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var rmvUser = "Eliminar Usuario";
+        var r = confirm("De verdad desea eliminar al usuario con ID: "+id);
+
+        if (r == true) {
+            $.ajax({
+                url : '/agregar/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        id : id,
+                        rmvUser : rmvUser,
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    alert(json['error']);
+                    var myNode = document.getElementById("usuario"+id);
+                    while (myNode.firstChild) {
+                        myNode.removeChild(myNode.firstChild);
+                    }
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }else{}
+    }
+</script>

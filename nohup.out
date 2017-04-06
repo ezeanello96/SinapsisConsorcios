@@ -1,0 +1,7 @@
+Performing system checks...
+
+System check identified no issues (0 silenced).
+August 03, 2016 - 18:02:51
+Django version 1.8.14, using settings 'consorcios.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
