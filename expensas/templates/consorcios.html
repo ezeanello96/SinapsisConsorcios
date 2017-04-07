@@ -1,0 +1,205 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    {% include "head.html" %}
+    <title>Consorcios</title>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#consorcios').DataTable( {
+                "order": [0, 'asc'],
+                "language": {
+                    "sProcessing":     "Procesando...",
+                    "sLengthMenu":     "Mostrar _MENU_ registros",
+                    "sZeroRecords":    "No se encontraron resultados",
+                    "sEmptyTable":     "Ninguna unidad cargada en el consorcio",
+                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix":    "",
+                    "sSearch":         "Buscar:",
+                    "sUrl":            "",
+                    "sInfoThousands":  ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst":    "Primero",
+                        "sLast":     "Último",
+                        "sNext":     "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
+            });
+        });
+    </script>
+    </head>
+<body>
+    {% include "nav.html" %}
+    <div id="page-wrapper" class="wrapper-bajado">
+        <div id="page-inner">
+            <div class="col-xs-12">
+                <h2 style="margin-left: 2%;">Agregue consorcios y usuarios al sistema:</h2> 
+            </div>
+        </div>
+        <div id="page-inner-cuerpo" class="col-xs-12">
+            <div class="row" >
+                <div class="col-lg-12">
+                    <ul class="tab">
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'VerConsorcios')" id="defaultOpen">Ver consorcios</a></li>
+                        <li><a href="javascript:void(0)" class="tablinks" onclick="openCity(event, 'AddConsorcios')" id="AddUnidad">Agregar consorcios</a></li>
+                    </ul>
+                    <div id="VerConsorcios" class="tabcontent">
+                        <h3>Aqui puede ver los consorcios cargados en el sistema...</h3><br>
+                        <table id="consorcios" class="display" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Direccion</th>
+                                    <th>Fondo de reserva</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for consorcio in consorcios %}
+                                <tr id="usuario{{ persona.id }}">
+                                    <td>{{ consorcio.id }}</td>
+                                    <td>{{ consorcio.nombre }}</td>
+                                    <td>{{ consorcio.direccion }}</td>
+                                    <td><div style="width: 170px;" class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input type="text" class="form-control" disabled value="{{ consorcio.fondoDeReserva }}">
+                                        </div>
+                                    </td>
+                                    <td><btn class="btn btn-warning" onclick="modificarUser({{ persona.id }})"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="eliminarUser({{ persona.id }})"><i class="fa fa-times"></i></btn></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div id="modConsorcio" style="height: 250px; margin-top: 25px; display: none;">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Nombre del consorcio:</label>
+                                    <input class="form-control" type="text" id="ModNombre">
+                                    <label style="margin-top:25px;">Dirección:</label>
+                                    <input class="form-control" type="text" id="ModDir">
+                                    <label style="margin-top:25px;">Fondo de Reserva:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input type="number" class="form-control" id="ModFondoDeReserva">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <label>Descripción del consorcio:</label>
+                                <input class="form-control" type="text" id="ModObservaciones" style="height: 118px;">
+                                <center><button style="margin-top:50px; width: 100%;" type="submit" class="btn btn-primary" onclick="addConsorcio()"><i class="fa fa-plus"></i> Agregar</button></center>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="AddConsorcios" class="tabcontent">
+                        <h3>Aqui puede agregar consorcios en el sistema...</h3><br>
+                        <div style="height: 250px; margin-top: 10px;">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label>Nombre del consorcio:</label>
+                                    <input class="form-control requerido" type="text" id="nombre" placeholder="Ej.: Trinidad I">
+                                    <label style="margin-top:25px;">Dirección:</label>
+                                    <input class="form-control" type="text" id="dir" placeholder="Ej.: Obispo Trejo 540">
+                                    <label style="margin-top:25px;">Fondo de Reserva:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input type="number" class="form-control" placeholder="Ej.: 1700.35" id="fondoDeReserva">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <label>Descripción del consorcio:</label>
+                                <input class="form-control" type="text" id="observaciones" style="height: 118px;">
+                                <center><button style="margin-top:50px; width: 100%;" type="submit" class="btn btn-primary" onclick="addConsorcio()"><i class="fa fa-plus"></i> Agregar</button></center>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
+<script>
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+    
+    function addConsorcio(){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var data = {csrfmiddlewaretoken : csrftoken,
+                    nombre : $('#nombre').val(),
+                    dir : $('#dir').val(),
+                    observaciones : $('#observaciones').val(),
+                    fondo : $('#fondoDeReserva').val(),
+                    addConsorcio : "Agregar consorcio",
+                   }
+
+        var table = document.getElementById("consorcios");
+
+        if(nombre == ''){
+            alert("Debe completar el campo de Nombre...")
+        }else{
+            $.ajax({
+                url : '/consorcios/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : data, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    alert(json['error']);
+                    if(json['prop']){
+                        $('#edificio').val('');
+                        $('#porcentual').val('');
+                        $('#PH').val('');
+                        $('#Depto').val('');
+
+                        var row = table.insertRow();
+                        var cell1 = row.insertCell(0);
+                        var cell2 = row.insertCell(1);
+                        var cell3 = row.insertCell(2);
+                        var cell4 = row.insertCell(3);
+                        var cell5 = row.insertCell(4);
+
+                        cell1.innerHTML = PH;
+                        cell2.innerHTML = Depto;
+                        cell3.innerHTML = json['prop'];
+                        cell4.innerHTML = json['inq'];
+                        cell5.innerHTML = '<a class="btn btn-warning" onclick="modificarUn('+json["unidad"]+')"><i class="fa fa-pencil-square-o"></i></a>';
+                    }else{}},
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }
+    }
+
+</script>

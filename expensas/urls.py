@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^archivosImportantes/', views.archivosImportantes, name='archivosImportantes'),
     url(r'^configuracion/', views.configuracion, name='configuracion'),
     url(r'^agregar/', views.agregar, name='agregar'),
+    url(r'^consorcios/', views.consorcios, name='consorcios'),
 #    url(r'^directorio/', views.directorio, name='directorio'),
 #    url(r'^contacto/', views.contacto, name='contacto'),
 #    url(r'^recuperar/', views.recuperar, name='recuperar'),

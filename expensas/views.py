@@ -432,3 +432,9 @@ def agregar(request):
                 persona.delete()
                 return JsonResponse({'error':"La persona ha sido eliminada con exito"})
     return render_to_response('agregar.html', {'edificios':edificios}, RequestContext(request))
+
+def consorcios(request):
+    consorcios = Edificio.objects.all()
+    if "addConsorcio" in request.POST:
+        band = 
+    return render_to_response('consorcios.html',{'consorcios':consorcios},RequestContext(request))
