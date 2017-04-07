@@ -6,10 +6,11 @@ class Edificio(models.Model):
     nombre = models.CharField("Nombre", max_length=50)
     direccion = models.CharField("Dirección", max_length=50)
     observaciones = models.CharField("Observaciones", max_length=250, null=True, blank=True)
+    fondoDeReserva = models.FloatField("Fondo de Reserva", blank=True)
     
     class Meta:
-        verbose_name = 'Edificio / Complejo'
-        verbose_name_plural = 'Edificios / Complejos'
+        verbose_name = 'Edificio / Consorcio'
+        verbose_name_plural = 'Edificios / Consorcios'
         ordering = ("nombre",)
         
     def __unicode__(self):
