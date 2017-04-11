@@ -6,7 +6,7 @@ class Edificio(models.Model):
     nombre = models.CharField("Nombre", max_length=50)
     direccion = models.CharField("Dirección", max_length=50)
     observaciones = models.CharField("Observaciones", max_length=250, null=True, blank=True)
-    fondoDeReserva = models.FloatField("Fondo de Reserva", blank=True)
+    fondoDeReserva = models.FloatField("Fondo de Reserva", blank=True, null=True)
     
     class Meta:
         verbose_name = 'Edificio / Consorcio'
@@ -203,3 +203,33 @@ class Porcentuales(models.Model):
         
     def __unicode__(self):
 	    return self.unidad.edificio.nombre.capitalize() + " - " + self.unidad.depto
+    
+class Expensa(models.Model):
+    tipo = models.CharField("Tipo de expensa", max_length=20)
+    periodo = models.CharField("Periodo", max_length=20)
+    total = models.FloatField("Total")
+    edificio = models.ForeignKey(Edificio)
+    
+    class Meta:
+        verbose_name = 'Expensa'
+        verbose_name_plural = 'Expensas'
+        ordering = ("edificio","periodo")
+        
+    def __unicode__(self):
+	    return self.tipo + " - " + self.fecha + " - " + self.edificio.nombre.capitalize()
+    
+class Gasto(models.Model):
+    fecha = models.DateField("Fecha del gasto")
+    importe = models.FloatField("Importe")
+    descripcion = models.CharField("Descripción", max_length=50)
+    factura = models.FileField("Archivo", upload_to='gastos/')
+    tipoDeGasto = models.ForeignKey(TipodeGastos)
+    expensa = models.ForeignKey(Expensa)
+    
+    class Meta:
+        verbose_name = 'Gasto'
+        verbose_name_plural = 'Gastos'
+        ordering = ("fecha","tipoDeGasto")
+        
+    def __unicode__(self):
+	    return self.tipoDeGasto.nombre.capitalize() + " - " + self.fecha

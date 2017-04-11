@@ -64,7 +64,7 @@
                             </thead>
                             <tbody>
                                 {% for consorcio in consorcios %}
-                                <tr id="usuario{{ persona.id }}">
+                                <tr id="consorcio{{ consorcio.id }}">
                                     <td>{{ consorcio.id }}</td>
                                     <td>{{ consorcio.nombre }}</td>
                                     <td>{{ consorcio.direccion }}</td>
@@ -73,7 +73,7 @@
                                         <input type="text" class="form-control" disabled value="{{ consorcio.fondoDeReserva }}">
                                         </div>
                                     </td>
-                                    <td><btn class="btn btn-warning" onclick="modificarUser({{ persona.id }})"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="eliminarUser({{ persona.id }})"><i class="fa fa-times"></i></btn></td>
+                                    <td><btn class="btn btn-warning" onclick="modCon('{{ consorcio.id }}')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCon('{{ consorcio.id }}','{{ consorcio.nombre }}')"><i class="fa fa-times"></i></btn></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -94,8 +94,8 @@
                             </div>
                             <div class="col-lg-8">
                                 <label>Descripción del consorcio:</label>
-                                <input class="form-control" type="text" id="ModObservaciones" style="height: 118px;">
-                                <center><button style="margin-top:50px; width: 100%;" type="submit" class="btn btn-primary" onclick="addConsorcio()"><i class="fa fa-plus"></i> Agregar</button></center>
+                                <textarea class="form-control" rows="4" id="ModObservaciones" style="height: 118px; max-height: 118px;"></textarea>
+                                <div id="ModBoton"><center><button style="margin-top:50px; width: 100%;" type="submit" class="btn btn-primary" onclick="addConsorcio()"><i class="fa fa-floppy-o"></i> Guardar</button></center></div>
                             </div>
                         </div>
                     </div>
@@ -116,8 +116,8 @@
                                 </div>
                             </div>
                             <div class="col-lg-8">
-                                <label>Descripción del consorcio:</label>
-                                <input class="form-control" type="text" id="observaciones" style="height: 118px;">
+                                <label for="observaciones">Descripción del consorcio:</label>
+                                <textarea class="form-control" rows="4" id="observaciones" style="height: 118px; max-height: 118px;"></textarea>
                                 <center><button style="margin-top:50px; width: 100%;" type="submit" class="btn btn-primary" onclick="addConsorcio()"><i class="fa fa-plus"></i> Agregar</button></center>
                             </div>
                         </div>
@@ -146,7 +146,7 @@
 
     // Get the element with id="defaultOpen" and click on it
     document.getElementById("defaultOpen").click();
-    
+
     function addConsorcio(){
         //Prepare csrf token
         var csrftoken = getCookie('csrftoken');
@@ -174,11 +174,11 @@
                     //console.log(json); // another sanity check
                     //On success show the data posted to server as a message
                     alert(json['error']);
-                    if(json['prop']){
-                        $('#edificio').val('');
-                        $('#porcentual').val('');
-                        $('#PH').val('');
-                        $('#Depto').val('');
+                    if(json['consorcio']){
+                        $('#nombre').val('');
+                        $('#dir').val('');
+                        $('#observaciones').val('');
+                        $('#fondoDeReserva').val('');
 
                         var row = table.insertRow();
                         var cell1 = row.insertCell(0);
@@ -187,11 +187,13 @@
                         var cell4 = row.insertCell(3);
                         var cell5 = row.insertCell(4);
 
-                        cell1.innerHTML = PH;
-                        cell2.innerHTML = Depto;
-                        cell3.innerHTML = json['prop'];
-                        cell4.innerHTML = json['inq'];
-                        cell5.innerHTML = '<a class="btn btn-warning" onclick="modificarUn('+json["unidad"]+')"><i class="fa fa-pencil-square-o"></i></a>';
+                        cell1.innerHTML = json['consorcio'].id;
+                        cell2.innerHTML = json['consorcio'].nombre;
+                        cell3.innerHTML = json['consorcio'].dir;
+                        cell4.innerHTML = '<div style="width: 170px;" class="input-group"><span class="input-group-addon">$</span><input type="text" class="form-control" disabled value="'+json['consorcio'].fondo+'"></div>';
+                        cell5.innerHTML = '<btn class="btn btn-warning" onclick="modCon(\''+json['consorcio'].id+'\')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCon(\''+json['consorcio'].id+'\',\''+json['consorcio'].nombre+'\')"><i class="fa fa-times"></i></btn>';
+
+                        openCity(event, 'VerConsorcios');
                     }else{}},
 
                 // handle a non-successful response
@@ -200,6 +202,122 @@
                 }
             });
         }
+    }
+
+    function rmvCon(id, nombre){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+
+        var r = confirm("De verdad desea eliminar el consorcio: "+nombre);
+
+        if (r == true) {
+            $.ajax({
+                url : '/consorcios/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        id : id,
+                        rmvCon : "Eliminar Consorcio",
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    alert(json['error']);
+                    var myNode = document.getElementById("consorcio"+id);
+                    while (myNode.firstChild) {
+                        myNode.removeChild(myNode.firstChild);
+                    }
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }else{}
+    }
+
+    function modCon(id){
+
+        var csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url : '/consorcios/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken, 
+                    modCon : "Modificar consorcio",
+                    id : id,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                if(json['consorcio']){
+                    $('#ModNombre').val(json['consorcio'].nombre);
+                    $('#ModDir').val(json['consorcio'].dir);
+                    $('#ModFondoDeReserva').val(parseFloat(json['consorcio'].fondo));
+                    $('#ModObservaciones').val(json['consorcio'].observaciones);
+
+                    document.getElementById("ModBoton").innerHTML = '<button style="margin-top:50px; width: 100%;" type="submit" class="btn btn-primary" onclick="guardarConsorcio(\''+id+'\',\''+json['consorcio'].nombre+'\')"><i class="fa fa-floppy-o"></i> Guardar consorcio</button>';
+
+
+                    document.getElementById("modConsorcio").style.display = 'block';
+                    $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
+
+                }else{alert("Error los datos del consorcio no se han podido encontrar...");}},
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    }
+
+    function guardarConsorcio(id, nombre){
+        //Prepare csrf token
+        var csrftoken = getCookie('csrftoken');
+        if($('#ModNombre').val() != ''){
+            var r = confirm("De verdad desea modificar el consorcio: "+nombre);
+            if (r == true) {
+                var data = { csrfmiddlewaretoken : csrftoken, 
+                            id : id,
+                            nombre : $('#ModNombre').val(),
+                            dir : $('#ModDir').val(),
+                            fondo : $('#ModFondoDeReserva').val(),
+                            observaciones : $('#ModObservaciones').val(),
+                            guaCon : "Guardar Consorcio",
+                           };
+
+                $.ajax({
+                    url : '/consorcios/', // the endpoint,commonly same url
+                    type : "POST", // http method
+                    data : data, // data sent with the post request
+
+                    // handle a successful response
+                    success : function(json) {
+                        //console.log(json); // another sanity check
+                        //On success show the data posted to server as a message
+                        alert(json['error']);
+                        if (json['consorcio']) {
+                            var fondo = json['consorcio'].fondo;
+                            var newRow = '<tr id="consorcio'+json['consorcio'].id+'"><td>'+json['consorcio'].id+'</td><td>'+json['consorcio'].nombre+'</td><td>'+json['consorcio'].dir+'</td><td><div style="width: 170px;" class="input-group"><span class="input-group-addon">$</span><input type="text" class="form-control" disabled value="'+fondo+'"></div></td><td><btn class="btn btn-warning" onclick="modCon(\''+json['consorcio'].id+'\')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCon(\''+json['consorcio'].id+'\',\''+json['consorcio'].nombre+'\')"><i class="fa fa-times"></i></btn></td></tr>';
+
+                            $('#consorcio'+json['consorcio'].id).replaceWith(newRow);
+                            document.getElementById("modConsorcio").style.display = 'none';
+                        }else{}
+
+                    },
+
+                    // handle a non-successful response
+                    error : function(xhr,errmsg,err) {
+                        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                    }
+                });}else{}
+        }else{alert("El campo nombre no puede quedar en blanco...")}
+
+
     }
 
 </script>

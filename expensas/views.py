@@ -436,5 +436,43 @@ def agregar(request):
 def consorcios(request):
     consorcios = Edificio.objects.all()
     if "addConsorcio" in request.POST:
-        band = 
+        band = Edificio.objects.filter(nombre = request.POST.get('nombre')).count()
+        if band == 0:
+            edificio = Edificio.objects.create()
+            edificio.nombre = request.POST.get('nombre')
+            edificio.direccion = request.POST.get('dir')
+            edificio.observaciones = request.POST.get('observaciones')
+            if request.POST.get('fondo') == '':
+                edificio.fondoDeReserva = float(0)
+            else:
+                edificio.fondoDeReserva = float(request.POST.get('fondo'))
+            edificio.save()
+            data = {'error':"Consorcio guardado con exito...",'consorcio':{'id':edificio.id, 'nombre':edificio.nombre, 'fondo':edificio.fondoDeReserva, 'dir':edificio.direccion}}
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'error':"Ya existe un consorcio con ese nombre"})
+    elif "rmvCon" in request.POST:
+        consorcio = Edificio.objects.get(id__exact = request.POST.get('id'))
+        consorcio.delete()
+        return JsonResponse({'error':"Consorcio eliminado con exito"})
+    elif "modCon" in request.POST:
+        consorcio = Edificio.objects.get(id__exact = request.POST.get('id'))
+        data = {'consorcio':{'nombre':consorcio.nombre, 'dir':consorcio.direccion, 'fondo':consorcio.fondoDeReserva, 'observaciones':consorcio.observaciones}}
+        return JsonResponse(data)
+    elif "guaCon" in request.POST:
+        band = Edificio.objects.filter(nombre = request.POST.get('nombre')).count()
+        if band == 0:
+            consorcio = Edificio.objects.get(id__exact = request.POST.get('id'))
+            consorcio.nombre = request.POST.get('nombre')
+            consorcio.direccion = request.POST.get('dir')
+            if request.POST.get('fondo') == '':
+                consorcio.fondoDeReserva = float(0)
+            else:
+                consorcio.fondoDeReserva = float(request.POST.get('fondo'))
+            consorcio.observaciones = request.POST.get('observaciones')
+            consorcio.save()
+            data = {'error':"Consorcio guardado con exito...",'consorcio':{'id':consorcio.id, 'nombre':consorcio.nombre, 'fondo':consorcio.fondoDeReserva, 'dir':consorcio.direccion}}
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'error':"Ya existe un consorcio con este nombre..."})
     return render_to_response('consorcios.html',{'consorcios':consorcios},RequestContext(request))
