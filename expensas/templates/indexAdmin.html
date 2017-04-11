@@ -1,126 +1,144 @@
 {% load staticfiles %}
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
-
-    <head>
-        <link href="{% static 'images/logo.png' %}" rel='shortcut icon' type='image/png'>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Inicio</title>
-        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
-        <link href="{% static 'css/custom.css' %}" rel="stylesheet" />
-        <link href='http://fonts.googleapis.com/css?family=Josefin+Slab:400,700' rel='stylesheet' type='text/css' />
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
-        <script src="https://code.jquery.com/jquery-2.1.0.min.js"></script>
-        <script src="{% static 'js/bootstrap.min.js' %}"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $(".select2").select2();
+    {% include "head.html" %}
+    <title>Agregar</title>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".select2").select2();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#gastos').DataTable( {
+                "order": [0, 'asc'],
+                "language": {
+                    "sProcessing":     "Procesando...",
+                    "sLengthMenu":     "Mostrar _MENU_ registros",
+                    "sZeroRecords":    "No se encontraron resultados",
+                    "sEmptyTable":     "Ningun gasto cargado en este periodo",
+                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix":    "",
+                    "sSearch":         "Buscar:",
+                    "sUrl":            "",
+                    "sInfoThousands":  ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst":    "Primero",
+                        "sLast":     "Último",
+                        "sNext":     "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "oAria": {
+                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    }
+                }
             });
-        </script>
+        });
+    </script>
     </head>
-    <body>
-        <nav class="navbar-default navbar-side" role="navigation">
-            <div class="sidebar-collapse">
-                <ul class="nav" id="main-menu" >
-                    <div style="background: #697DFF; color:#ffffff;margin-bottom:1%;">
-                        <center><a href="/" class="cd-logo"><img style="margin-top: 10%; margin-left: 1%; height: 125px; width: 125px;" src="{% static 'images/logo.png' %}" alt="Logo"></a><br>Bienvenido/a, <span class="resaltado">{{ user.get_full_name }}</span></center>
-                        <br>
-                    </div>
-                    <li><a class="active-menu" href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-building-o"></i> Consorcios <span class="caret"></span></a>
-                        <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-                            <li role="presentation"><a class="active-menu" role="menuitem" tabindex="-1" href="/"><i class="fa fa-balance-scale"></i> Expensas</a></li>
-                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/espaciosComunes"><i class="fa fa-users"></i> Espacios comunes</a></li>
-                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/numerosUtiles"><i class="fa fa-phone"></i> Números utiles</a></li>
-                            <li role="presentation"><a role="menuitem" tabindex="-1" href="/archivosImportantes"><i class="fa fa-file-o"></i> Archivos importantes</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="/mensajes"><i class="fa fa-envelope-o"></i> Mensajes<br /> ({{ mensajesNoLeidos }} No Leídos)</a></li>
-                    <li><a href="/enviar_mensaje"><i class="fa fa-envelope-o"></i> Enviar Mensaje</a></li>
-                    <li><a href="/admin" target="_blank"><i class="fa fa-plus"></i> Cargar Edificios, Departamentos y/o Propietarios</a></li>
-                    <li><a class="alerta" href="/logout"><i class="fa fa-sign-out"></i>Salir</a></li>
-                </ul>
-            </div>
-        </nav>
-        <div id="page-wrapper" class="wrapper-bajado">
-            {% if exito or error %}
-            <div class="col-lg-12 btn btn-{% if exito %}success{% elif error %}danger{% endif %}">
-                <p>{% if exito %}Los cambios han sido guardados con éxito!{% elif error %}Ha ocurrido un error en el proceso, por favor verifique los datos y vuelva a intentarlo.{% endif %}</p>
-            </div>
-            {% endif %}
-            <div id="page-inner-cuerpo" class="col-xs-12">
-                <div class="row" >
-                    <div class="col-lg-12">
-                        <h2 style="margin-bottom: 30px;">Cargar las expensas del mes:</h2> 
-                        <form method="post">{% csrf_token %}
-                            <div class="col-lg-9">
-                                <div class="form-group">
-                                    <label>Seleccione el Edificio / Complejo:</label>
-                                    <select class="select2 form-control" name="selectDepartamento">
-                                        {% for edificio in edificios %}
-                                        <option value="{{ edificio.id }}">{{ edificio.nombre }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+<body>
+    {% include "nav.html" %}
+    <div id="page-wrapper" class="wrapper-bajado">
+        {% if exito or error %}
+        <div class="col-lg-12 btn btn-{% if exito %}success{% elif error %}danger{% endif %}">
+            <p>{% if exito %}Los cambios han sido guardados con éxito!{% elif error %}Ha ocurrido un error en el proceso, por favor verifique los datos y vuelva a intentarlo.{% endif %}</p>
+        </div>
+        {% endif %}
+        <div id="page-inner-cuerpo" class="col-xs-12">
+            <div class="row" >
+                <div class="col-lg-12">
+                    <h2 style="margin-bottom: 30px;">Cargar las expensas del mes:</h2> 
+                    <form method="post">
+                        <div class="col-lg-9">
+                            <div class="form-group">
+                                <label>Seleccione el Edificio / Complejo:</label>
+                                <select class="select2 form-control" name="selectDepartamento">
+                                    {% for edificio in edificios %}
+                                    <option value="{{ edificio.id }}">{{ edificio.nombre }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
-                            <div class="col-lg-2">
-                                <label>Periodo:</label>
-                                <input class="form-control" type="text" disabled value="02/2017">
+                        </div>
+                        <div class="col-lg-2">
+                            <label>Periodo:</label>
+                            <select class="form-control">
+                                <option value="01/{{ year }}">01/{{ year }}</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-1">
+                            <button type="submit" class="btn btn-primary" style="margin-top:25px;">Cargar</button>
+                        </div>
+                    </form>
+                    {% if edificioSeleccionado %}
+                    <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                        <div class="col-lg-12">
+                            <h4>Cargue las expensas de cada departamento:</h4>
+                        </div>
+                        <div class="col-lg-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="align:right;"><btn class="btn btn-warning"><i class="fa fa-pencil-square-o"></i></btn><btn class="btn btn-danger"><i class="fa fa-times"></i></btn></td>
+                                        <td>Expensas comunes</td>
+                                        <td>12/02/2017</td>
+                                        <td>Luz, agua, gas</td>
+                                        <td>$1700.50</td>
+                                        <td><a href="#">Descargar</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td><btn class="btn btn-success"><i class="fa fa fa-plus"></i></btn></td>
+                                        <td><select class="select2 form-control" name="selectGasto"></select></td>
+                                        <td><input class="form-control" type="date"></td>
+                                        <td><input class="form-control" type="text" placeholder="Descripción del gasto"></td>
+                                        <td><input class="form-control" type="number" min="0" placeholder="Importe"></td>
+                                        <td><input class="form-control" type="file"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table id="gastos" class="display" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th>Gastos</th>
+                                        <th>Fecha</th>
+                                        <th>Importe</th>
+                                        <th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for consorcio in consorcios %}
+                                    <tr id="consorcio{{ consorcio.id }}">
+                                        <td>{{ consorcio.id }}</td>
+                                        <td>{{ consorcio.nombre }}</td>
+                                        <td>{{ consorcio.direccion }}</td>
+                                        <td><div style="width: 170px;" class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input type="text" class="form-control" disabled value="{{ consorcio.fondoDeReserva }}">
+                                            </div>
+                                        </td>
+                                        <td><btn class="btn btn-warning" onclick="modCon('{{ consorcio.id }}')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCon('{{ consorcio.id }}','{{ consorcio.nombre }}')"><i class="fa fa-times"></i></btn></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <div class="col-lg-12" style="text-align:center;">
+                                <button type="submit" class="btn btn-primary">Agregar gasto</button>
                             </div>
-                            <div class="col-lg-1">
-                                <button type="submit" class="btn btn-primary" style="margin-top:25px;">Cargar</button>
-                            </div>
-                        </form>
-                        {% if edificioSeleccionado %}
-                        <form method="post" enctype="multipart/form-data">{% csrf_token %}
-                            <div class="col-lg-12">
-                                <h4>Cargue las expensas de cada departamento:</h4>
-                            </div>
-                            <div class="col-lg-12">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Acciones</th>
-                                            <th>Gastos</th>
-                                            <th>Fecha</th>
-                                            <th>Descripción</th>
-                                            <th>Importe</th>
-                                            <th>Factura</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="align:right;"><btn class="btn btn-warning"><i class="fa fa-pencil-square-o"></i></btn><btn class="btn btn-danger"><i class="fa fa-times"></i></btn></td>
-                                            <td>Expensas comunes</td>
-                                            <td>12/02/2017</td>
-                                            <td>Luz, agua, gas</td>
-                                            <td>$1700.50</td>
-                                            <td><a href="#">Descargar</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td><btn class="btn btn-success"><i class="fa fa fa-plus"></i></btn></td>
-                                            <td><select class="select2 form-control" name="selectGasto"></select></td>
-                                            <td><input class="form-control" type="date"></td>
-                                            <td><input class="form-control" type="text" placeholder="Descripción del gasto"></td>
-                                            <td><input class="form-control" type="number" min="0" placeholder="Importe"></td>
-                                            <td><input class="form-control" type="file"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <div class="col-lg-" ></div>
-                                <div class="col-lg-12" style="text-align:center;">
-                                    <button type="submit" class="btn btn-primary">Guardar</button>
-                                </div>
-                            </div>
-                            <input type="hidden" name="edificio" value="{{ edificioSeleccionado.id }}">
-                        </form>
-                        {% endif %}
-                    </div>
+                        </div>
+                        <input type="hidden" name="edificio" value="{{ edificioSeleccionado.id }}">
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </body>
+    </div>
+</body>
 </html>

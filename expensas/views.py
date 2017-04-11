@@ -24,51 +24,17 @@ def get_consorcios(usuario):
 
 @login_required(login_url='/login')
 def index(request):
-    exito, error = None, None
-    if request.user.is_staff:
+    expensas = None
+    usuario = Persona.objects.get(username = request.user.username)
+    departamentos = Departamento.objects.filter(Q(propietario = usuario) | Q(inquilino = usuario))
+    mensajesNoLeidos = Mensaje.objects.filter(fechaLeido = None).filter(para = usuario).count()
+    if request.method == "POST":
         try:
-            usuario = request.user
-            edificios = Edificio.objects.all()
-            edificioSeleccionado  = None
-            if request.method == "POST":
-                if "selectDepartamento" in request.POST:
-                    edificioSeleccionado = Edificio.objects.get(id = request.POST["selectDepartamento"])
-                elif "informeCuenta" in request.FILES:
-                    informe = request.FILES["informeCuenta"]
-                    edificio = Edificio.objects.get(id = request.POST["edificio"])
-                    rendicion = RendicionCuenta.objects.create(edificio = edificio, archivo = informe)
-                    rendicion.save()
-                    for i in range(edificio.departamento_set.all().count()):
-                        dpto = Departamento.objects.get(id = edificio.departamento_set.all()[i].id)
-                        archivo = request.FILES[str(dpto.id)]
-                        expensa = Expensa.objects.create(dpto = dpto, archivo = archivo, rendicion = rendicion)
-                        expensa.save()
-                        subject, from_email = 'Nueva Expensa Cargada en el Sistema', 'secretaria@criscioneyasociados.com.ar'
-                        html_content = 'Hola, desde la administración te informamos que hemos cargado las expensas digitales a través de nuestro portal de internet o haciendo click <a href="http://criscioneyasociados.com.ar/sistema">aquí</a>. Por favor, ingrese ahora para poder descargarlas. Desde ya muchas gracias, Saludos.'
-                        msg = EmailMultiAlternatives(subject, '', from_email, [dpto.propietario.email])
-                        msg.attach_alternative(html_content, "text/html")
-                        msg.send()
-                        if dpto.inquilino != None:
-                            msg = EmailMultiAlternatives(subject, '', from_email, [dpto.inquilino.email])
-                            msg.attach_alternative(html_content, "text/html")
-                            msg.send()
-                        exito = True
+            departamento = Departamento.objects.get(id = request.POST["selectDepartamento"])
+            expensas = departamento.expensa_set.all().order_by('-fecha')[:12]
         except:
-            error = True
-        mensajesNoLeidos = Mensaje.objects.filter(fechaLeido = None).filter(para = usuario).count()
-        return render_to_response("indexAdmin.html", {"edificios": edificios, "edificioSeleccionado": edificioSeleccionado, "mensajesNoLeidos": mensajesNoLeidos, "error":error, "exito":exito}, RequestContext(request))
-    else:
-        expensas = None
-        usuario = Persona.objects.get(username = request.user.username)
-        departamentos = Departamento.objects.filter(Q(propietario = usuario) | Q(inquilino = usuario))
-        mensajesNoLeidos = Mensaje.objects.filter(fechaLeido = None).filter(para = usuario).count()
-        if request.method == "POST":
-            try:
-                departamento = Departamento.objects.get(id = request.POST["selectDepartamento"])
-                expensas = departamento.expensa_set.all().order_by('-fecha')[:12]
-            except:
-                error=True
-        return render_to_response("index.html", {"mensajesNoLeidos": mensajesNoLeidos, "departamentos":departamentos, "expensas":expensas, "error":error}, RequestContext(request))
+            error=True
+    return render_to_response("index.html", {"mensajesNoLeidos": mensajesNoLeidos, "departamentos":departamentos, "expensas":expensas, "error":error}, RequestContext(request))
 
 @login_required(login_url='/login')
 def enviar_mensaje(request):
@@ -476,3 +442,36 @@ def consorcios(request):
         else:
             return JsonResponse({'error':"Ya existe un consorcio con este nombre..."})
     return render_to_response('consorcios.html',{'consorcios':consorcios},RequestContext(request))
+
+def administracion(request):
+    exito, error = None, None
+    if request.user.is_staff:
+        month = datetime.datetime.now().strftime("%m")
+        print str(month)+"/"+str(datetime.date.today().year)
+        usuario = request.user
+        edificios = Edificio.objects.all()
+        edificioSeleccionado  = None
+        mensajesNoLeidos = Mensaje.objects.filter(fechaLeido = None).filter(para = usuario).count()
+        if request.method == "POST":
+            if "selectDepartamento" in request.POST:
+                edificioSeleccionado = Edificio.objects.get(id = request.POST["selectDepartamento"])
+            elif "informeCuenta" in request.FILES:
+                informe = request.FILES["informeCuenta"]
+                edificio = Edificio.objects.get(id = request.POST["edificio"])
+                rendicion = RendicionCuenta.objects.create(edificio = edificio, archivo = informe)
+                rendicion.save()
+                for i in range(edificio.departamento_set.all().count()):
+                    dpto = Departamento.objects.get(id = edificio.departamento_set.all()[i].id)
+                    archivo = request.FILES[str(dpto.id)]
+                    expensa = Expensa.objects.create(dpto = dpto, archivo = archivo, rendicion = rendicion)
+                    expensa.save()
+                    subject, from_email = 'Nueva Expensa Cargada en el Sistema', 'secretaria@criscioneyasociados.com.ar'
+                    html_content = 'Hola, desde la administración te informamos que hemos cargado las expensas digitales a través de nuestro portal de internet o haciendo click <a href="http://criscioneyasociados.com.ar/sistema">aquí</a>. Por favor, ingrese ahora para poder descargarlas. Desde ya muchas gracias, Saludos.'
+                    msg = EmailMultiAlternatives(subject, '', from_email, [dpto.propietario.email])
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
+                    if dpto.inquilino != None:
+                        msg = EmailMultiAlternatives(subject, '', from_email, [dpto.inquilino.email])
+                        msg.attach_alternative(html_content, "text/html")
+                        msg.send()
+        return render_to_response("indexAdmin.html", {"edificios": edificios, "edificioSeleccionado": edificioSeleccionado, "mensajesNoLeidos": mensajesNoLeidos, "error":error, "exito":exito}, RequestContext(request))

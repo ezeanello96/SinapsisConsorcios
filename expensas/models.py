@@ -225,6 +225,7 @@ class Gasto(models.Model):
     factura = models.FileField("Archivo", upload_to='gastos/')
     tipoDeGasto = models.ForeignKey(TipodeGastos)
     expensa = models.ForeignKey(Expensa)
+    periodo = models.CharField("Periodo", max_length=20, blank = True)
     
     class Meta:
         verbose_name = 'Gasto'
