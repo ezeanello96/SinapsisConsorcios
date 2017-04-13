@@ -10,6 +10,7 @@
     </script>
     <script type="text/javascript">
         $(document).ready(function() {
+            document.getElementById('{{ per }}').selected = true;
             $('#gastos').DataTable( {
                 "order": [0, 'asc'],
                 "language": {
@@ -52,7 +53,7 @@
             <div class="row" >
                 <div class="col-lg-12">
                     <h2 style="margin-bottom: 30px;">Cargar las expensas del mes:</h2> 
-                    <form method="post">
+                    <form method="post">{% csrf_token %}
                         <div class="col-lg-9">
                             <div class="form-group">
                                 <label>Seleccione el Edificio / Complejo:</label>
@@ -66,7 +67,18 @@
                         <div class="col-lg-2">
                             <label>Periodo:</label>
                             <select class="form-control">
-                                <option value="01/{{ year }}">01/{{ year }}</option>
+                                <option id="01/{{ year }}" value="01/{{ year }}">01/{{ year }}</option>
+                                <option id="02/{{ year }}"value="02/{{ year }}">02/{{ year }}</option>
+                                <option id="03/{{ year }}"value="03/{{ year }}">03/{{ year }}</option>
+                                <option id="04/{{ year }}"value="04/{{ year }}">04/{{ year }}</option>
+                                <option id="05/{{ year }}"value="05/{{ year }}">05/{{ year }}</option>
+                                <option id="06/{{ year }}"value="06/{{ year }}">06/{{ year }}</option>
+                                <option id="07/{{ year }}"value="07/{{ year }}">07/{{ year }}</option>
+                                <option id="08/{{ year }}"value="08/{{ year }}">08/{{ year }}</option>
+                                <option id="09/{{ year }}"value="09/{{ year }}">09/{{ year }}</option>
+                                <option id="10/{{ year }}"value="10/{{ year }}">10/{{ year }}</option>
+                                <option id="11/{{ year }}"value="11/{{ year }}">11/{{ year }}</option>
+                                <option id="12/{{ year }}"value="12/{{ year }}">12/{{ year }}</option>
                             </select>
                         </div>
                         <div class="col-lg-1">
@@ -142,3 +154,8 @@
     </div>
 </body>
 </html>
+<script>
+    function agregarGasto(){
+        document.getElementById("addGasto").style.display = 'none';
+    }
+</script>

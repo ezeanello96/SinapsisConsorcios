@@ -446,8 +446,9 @@ def consorcios(request):
 def administracion(request):
     exito, error = None, None
     if request.user.is_staff:
-        month = datetime.datetime.now().strftime("%m")
-        print str(month)+"/"+str(datetime.date.today().year)
+        month = str(datetime.datetime.now().strftime("%m"))
+        year = str(datetime.date.today().year)
+        per = month+"/"+year
         usuario = request.user
         edificios = Edificio.objects.all()
         edificioSeleccionado  = None
@@ -474,4 +475,4 @@ def administracion(request):
                         msg = EmailMultiAlternatives(subject, '', from_email, [dpto.inquilino.email])
                         msg.attach_alternative(html_content, "text/html")
                         msg.send()
-        return render_to_response("indexAdmin.html", {"edificios": edificios, "edificioSeleccionado": edificioSeleccionado, "mensajesNoLeidos": mensajesNoLeidos, "error":error, "exito":exito}, RequestContext(request))
+        return render_to_response("indexAdmin.html", {"edificios": edificios, "edificioSeleccionado": edificioSeleccionado, "mensajesNoLeidos": mensajesNoLeidos, "error":error, "exito":exito, "per":per, "year":year}, RequestContext(request))
