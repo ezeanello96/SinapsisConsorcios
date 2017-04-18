@@ -130,7 +130,7 @@
                                     <td><input class="form-control" id="{{tipoGasto.id}}B" type="number" min="0" max="100" value="{{tipoGasto.porcentajeB}}"></td>
                                     <td><input class="form-control" id="{{tipoGasto.id}}C" type="number" min="0" max="100" value="{{tipoGasto.porcentajeC}}"></td>
                                     <td><input class="form-control" id="{{tipoGasto.id}}D" type="number" min="0" max="100" value="{{tipoGasto.porcentajeD}}"></td>
-                                    <td><button type="submit" class="btn btn-primary" onclick="guardarTG({{ tipoGasto.id }})"><i class="fa fa-floppy-o"></i></button><btn class="btn btn-danger" onclick="eliminarTG({{ tipoGasto.id }},'{{ tipoGasto.nombre }}')" ><i class="fa fa-times"></i></btn></td>
+                                    <td><button type="submit" class="btn btn-primary" onclick="guardarTG({{ tipoGasto.id }})"><i class="fa fa-floppy-o"></i></button> <btn class="btn btn-danger" onclick="eliminarTG({{ tipoGasto.id }},'{{ tipoGasto.nombre }}')" ><i class="fa fa-times"></i></btn></td>
                                 </tr>
                                 {% endfor %}
                                 {% endif %}
@@ -354,6 +354,8 @@
         var porD = $('#porDTG').val();
         var nTG = $('#edificio').val();
 
+        var table = document.getElementById('TGastos');
+
         $.ajax({
             url : '/configuracion/', // the endpoint,commonly same url
             type : "POST", // http method
@@ -371,10 +373,32 @@
                 //console.log(json); // another sanity check
                 //On success show the data posted to server as a message
                 alert(json['error']);
-                setTimeout(function () {
-                    window.location.reload(1);
-                }, 2000);
+                if(json['gastos']){
+                    $('#nomTG').val('');
+                    $('#porATG').val('');
+                    $('#porBTG').val('');
+                    $('#porCTG').val('');
+                    $('#porDTG').val('');
 
+                    var row = table.insertRow();
+                    row.id = "TG"+json['gasto'].id;
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    var cell4 = row.insertCell(3);
+                    var cell5 = row.insertCell(4);
+                    var cell6 = row.insertCell(5);
+                    var cell7 = row.insertCell(6);
+
+
+                    cell1.innerHTML = json['gasto'].id;
+                    cell2.innerHTML = json['gasto'].nombre;
+                    cell3.innerHTML = '<input class="form-control" id="'+json['gasto'].id+'A" type="number" min="0" max="100" value="'+json['gasto'].porA+'">';
+                    cell4.innerHTML = '<input class="form-control" id="'+json['gasto'].id+'B" type="number" min="0" max="100" value="'+json['gasto'].porB+'">';
+                    cell5.innerHTML = '<input class="form-control" id="'+json['gasto'].id+'C" type="number" min="0" max="100" value="'+json['gasto'].porC+'">';
+                    cell6.innerHTML = '<input class="form-control" id="'+json['gasto'].id+'D" type="number" min="0" max="100" value="'+json['gasto'].porD+'">';
+                    cell7.innerHTML = '<button type="submit" class="btn btn-primary" onclick="guardarTG({{ tipoGasto.id }})"><i class="fa fa-floppy-o"></i></button> <btn class="btn btn-danger" onclick="eliminarTG({{ tipoGasto.id }},'{{ tipoGasto.nombre }}')" ><i class="fa fa-times"></i></btn>';
+                }else{}
             },
 
             // handle a non-successful response

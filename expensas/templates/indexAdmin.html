@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
     {% include "head.html" %}
-    <title>Agregar</title>
+    <title>Administración</title>
     <script type="text/javascript">
         $(document).ready(function() {
             $(".select2").select2();
@@ -57,7 +57,7 @@
                         <div class="col-lg-9">
                             <div class="form-group">
                                 <label>Seleccione el Edificio / Complejo:</label>
-                                <select class="select2 form-control" name="selectDepartamento">
+                                <select class="select2 form-control" id="selectConsorcio" name="selectConsorcio">
                                     {% for edificio in edificios %}
                                     <option value="{{ edificio.id }}">{{ edificio.nombre }}</option>
                                     {% endfor %}
@@ -66,7 +66,7 @@
                         </div>
                         <div class="col-lg-2">
                             <label>Periodo:</label>
-                            <select class="form-control">
+                            <select class="form-control" name="selectPeriodo">
                                 <option id="01/{{ year }}" value="01/{{ year }}">01/{{ year }}</option>
                                 <option id="02/{{ year }}"value="02/{{ year }}">02/{{ year }}</option>
                                 <option id="03/{{ year }}"value="03/{{ year }}">03/{{ year }}</option>
@@ -86,67 +86,129 @@
                         </div>
                     </form>
                     {% if edificioSeleccionado %}
-                    <form method="post" enctype="multipart/form-data">{% csrf_token %}
-                        <div class="col-lg-12">
-                            <h4>Cargue las expensas de cada departamento:</h4>
-                        </div>
-                        <div class="col-lg-12">
-                            <table class="table">
-                                <thead>
-                                    <tr>
+                    {% if not expensa %}
+                    <div class="col-lg-12">
+                        <form method="post">{% csrf_token %}
+                            <div class="col-lg-7">
+                                <h4>No existen expensas en el consorcio {{ edificioSeleccionado.nombre.capitalize }} y en el periodo {{ selPer }}. Seleccione un tipo para añadir: </h4>
+                            </div>
+                            <div class="col-lg-4" style="margin-top: 10px;">
+                                <select class="form-control" name="tipo_expensa">
+                                    <option>Expensas ordinarias</option>
+                                    <option>Expensas extraordinarias</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-1">
+                                <input type="hidden" name="addExpensa">
+                                <input type="hidden" name="edificioSeleccionado" value="{{ edificioSeleccionado.id }}">
+                                <input type="hidden" name="periodoSeleccionado" value="{{ selPer }}">
+                                <button type="submit" class="btn btn-success" style="margin-top:10px;">Agregar</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="col-lg-12 d-inline-block">
+                        <h4>Cargando gastos a las {{ expensa.tipo }} del consorcio {{ edificioSeleccionado.nombre.capitalize }} en el periodo {{ per }}:</h4>
+                    </div>
+                    <div class="col-lg-12">
+                        <table class="table">
+                            <thead>
+                                <tr>
 
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td style="align:right;"><btn class="btn btn-warning"><i class="fa fa-pencil-square-o"></i></btn><btn class="btn btn-danger"><i class="fa fa-times"></i></btn></td>
-                                        <td>Expensas comunes</td>
-                                        <td>12/02/2017</td>
-                                        <td>Luz, agua, gas</td>
-                                        <td>$1700.50</td>
-                                        <td><a href="#">Descargar</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td><btn class="btn btn-success"><i class="fa fa fa-plus"></i></btn></td>
-                                        <td><select class="select2 form-control" name="selectGasto"></select></td>
-                                        <td><input class="form-control" type="date"></td>
-                                        <td><input class="form-control" type="text" placeholder="Descripción del gasto"></td>
-                                        <td><input class="form-control" type="number" min="0" placeholder="Importe"></td>
-                                        <td><input class="form-control" type="file"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <table id="gastos" class="display" cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>Gastos</th>
-                                        <th>Fecha</th>
-                                        <th>Importe</th>
-                                        <th>Opciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for consorcio in consorcios %}
-                                    <tr id="consorcio{{ consorcio.id }}">
-                                        <td>{{ consorcio.id }}</td>
-                                        <td>{{ consorcio.nombre }}</td>
-                                        <td>{{ consorcio.direccion }}</td>
-                                        <td><div style="width: 170px;" class="input-group">
-                                            <span class="input-group-addon">$</span>
-                                            <input type="text" class="form-control" disabled value="{{ consorcio.fondoDeReserva }}">
-                                            </div>
-                                        </td>
-                                        <td><btn class="btn btn-warning" onclick="modCon('{{ consorcio.id }}')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCon('{{ consorcio.id }}','{{ consorcio.nombre }}')"><i class="fa fa-times"></i></btn></td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                            <div class="col-lg-12" style="text-align:center;">
-                                <button type="submit" class="btn btn-primary">Agregar gasto</button>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="align:right;"><btn class="btn btn-warning"><i class="fa fa-pencil-square-o"></i></btn><btn class="btn btn-danger"><i class="fa fa-times"></i></btn></td>
+                                    <td>Expensas comunes</td>
+                                    <td>12/02/2017</td>
+                                    <td>Luz, agua, gas</td>
+                                    <td>$1700.50</td>
+                                    <td><a href="#">Descargar</a></td>
+                                </tr>
+                                <tr>
+                                    <td><btn class="btn btn-success"><i class="fa fa fa-plus"></i></btn></td>
+                                    <td><select class="select2 form-control" name="selectGasto"></select></td>
+                                    <td><input class="form-control" type="date"></td>
+                                    <td><input class="form-control" type="text" placeholder="Descripción del gasto"></td>
+                                    <td><input class="form-control" type="number" min="0" placeholder="Importe"></td>
+                                    <td><input class="form-control" type="file"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table id="gastos" class="display" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Gastos</th>
+                                    <th>Fecha</th>
+                                    <th>Concepto</th>
+                                    <th>Importe</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="gasto1">
+                                    <td>1</td>
+                                    <td>18/04/2017</td>
+                                    <td>Luz</td>
+                                    <td><div style="width: 170px;" class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input type="text" class="form-control" disabled value="2300">
+                                        </div>
+                                    </td>
+                                    <td><btn class="btn btn-warning" onclick="modCon('{{ consorcio.id }}')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCon('{{ consorcio.id }}','{{ consorcio.nombre }}')"><i class="fa fa-times"></i></btn></td>
+                                </tr>
+                                {% for gasto in gastos %}
+                                <tr id="gasto{{ gasto.id }}">
+                                    <td>{{ gasto.id }}</td>
+                                    <td>{{ gasto.fecha }}</td>
+                                    <td>{{ gasto.TipodeGastos.nombre }}</td>
+                                    <td><div style="width: 170px;" class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input type="text" class="form-control" disabled value="{{ gasto.importe }}">
+                                        </div>
+                                    </td>
+                                    <td><btn class="btn btn-warning" onclick="modCon('{{ consorcio.id }}')"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCon('{{ consorcio.id }}','{{ consorcio.nombre }}')"><i class="fa fa-times"></i></btn></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="col-lg-12" style="text-align:center; margin-top: 25px;">
+                            <button onclick="agregarGasto()" class="btn btn-primary">Agregar gasto</button> 
+                            <button type="submit" class="btn btn-primary">Prorratear gastos, generar y enviar ticket de pago</button>
+                            <button type="submit" class="btn btn-primary">Generar expensa manual</button>
+                            <div style="display:none; margin-top: 50px;" id="addGasto">
+                                <div class="col-lg-5">
+                                    <label>Fecha del gasto:</label>
+                                    <input class="form-control" type="date" id="add_fecha"><br>
+                                    <label>Importe del gasto:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">$</span>
+                                        <input type="number" class="form-control" id="add_importe" min="0">
+                                    </div><br>
+                                    <label>Factura del gasto:</label>
+                                    <input class="form-control" type="file" id="add_factura">
+                                </div>
+                                <div class="col-lg-7">
+                                    <label>Descripción del gasto:</label>
+                                    <textarea class="form-control" rows="4" style="resize: none;" id="add_descripcion"></textarea><br>
+                                    <div class="form-group">
+                                        <label>Concepto de gasto:</label>
+                                        <select class="select2 form-control" id="add_tipoGasto" style="width: 100%">
+                                            {% for tipoGasto in tipoGastos %}
+                                            <option value="{{ tipoGasto.id }}">{{ tipoGasto.nombre }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:none;" id="modGasto">
+
                             </div>
                         </div>
-                        <input type="hidden" name="edificio" value="{{ edificioSeleccionado.id }}">
-                    </form>
+                    </div>
+                    <input type="hidden" name="edificio" value="{{ edificioSeleccionado.id }}">
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -155,7 +217,16 @@
 </body>
 </html>
 <script>
+    {% if edificioSeleccionado %}$(document).ready(function() {$("#selectConsorcio").select2('val','{{ edificioSeleccionado.id }}');}){% endif %}
+
     function agregarGasto(){
-        document.getElementById("addGasto").style.display = 'none';
+        var estado = document.getElementById("addGasto").style.display;
+        if(estado == 'none'){
+            document.getElementById("addGasto").style.display = 'block';
+            $("html, body").animate({ scrollTop: $(document).height()-$(window).height() });
+        }else{
+            document.getElementById("addGasto").style.display = 'none';
+        }
     }
+
 </script>

@@ -279,7 +279,7 @@ def configuracion(request):
                     edificio = Edificio.objects.get(id__exact = request.POST.get('nTG'))
                     gasto = TipodeGastos.objects.create(nombre = nombre, edificio = edificio, porcentajeA = por[0], porcentajeB = por[1], porcentajeC = por[2], porcentajeD = por[3])
                     gasto.save()
-                    return JsonResponse({'error':"El tipo de gasto se guardo con exito"})
+                    return JsonResponse({'error':"El tipo de gasto se guardo con exito",'gasto':{'id':gasto.id,'nombre':gasto.nombre,'porA':gasto.porcentajeA, 'porB':gasto.porcentajeB, 'porC':gasto.porcentajeC, 'porD':gasto.porcentajeD}})
                 else:
                     return JsonResponse({'error':"No se pudo guardar este tipo de gasto por que ya hay uno con ese nombre"})
             elif "rmvTG" in request.POST:
@@ -454,9 +454,26 @@ def administracion(request):
         edificioSeleccionado  = None
         mensajesNoLeidos = Mensaje.objects.filter(fechaLeido = None).filter(para = usuario).count()
         if request.method == "POST":
-            if "selectDepartamento" in request.POST:
-                edificioSeleccionado = Edificio.objects.get(id = request.POST["selectDepartamento"])
-            elif "informeCuenta" in request.FILES:
+            if "selectConsorcio" in request.POST:
+                edificioSeleccionado = Edificio.objects.get(id = request.POST.get("selectConsorcio"))
+                expensa = None
+                selPer = request.POST.get("selectPeriodo")
+                try:
+                    expensa = Expensa.objects.get(edificio = edificioSeleccionado, periodo = selPer)
+                    gastos = Gasto.objects.filter(expensa = expensa)
+                    tipoGastos = TipodeGastos.objects.filter(edificio = edificioSeleccionado)
+                except Expensa.DoesNotExist:
+                    expensa = expensa
+                    gastos = None
+                return render_to_response("indexAdmin.html", {"edificios": edificios, "edificioSeleccionado": edificioSeleccionado, "mensajesNoLeidos": mensajesNoLeidos, "expensa":expensa, "per":per, "selPer":selPer, "year":year, "gastos":gastos, "tipoGastos":tipoGastos}, RequestContext(request))
+            if "addExpensa" in request.POST:
+                edificioSeleccionado = Edificio.objects.get(id = request.POST.get("edificioSeleccionado"))
+                print request.POST.get("selectPeriodo")
+                expensa = Expensa.objects.create(tipo = request.POST.get("tipo_expensa"), periodo = request.POST.get("periodoSeleccionado"), total = 0, edificio = edificioSeleccionado)
+                expensa.save()
+                return render_to_response("indexAdmin.html", {"edificios": edificios, "edificioSeleccionado": edificioSeleccionado, "mensajesNoLeidos": mensajesNoLeidos, "expensa":expensa, "per":per, "year":year}, RequestContext(request))
+            
+            """elif "informeCuenta" in request.FILES:
                 informe = request.FILES["informeCuenta"]
                 edificio = Edificio.objects.get(id = request.POST["edificio"])
                 rendicion = RendicionCuenta.objects.create(edificio = edificio, archivo = informe)
@@ -474,5 +491,5 @@ def administracion(request):
                     if dpto.inquilino != None:
                         msg = EmailMultiAlternatives(subject, '', from_email, [dpto.inquilino.email])
                         msg.attach_alternative(html_content, "text/html")
-                        msg.send()
+                        msg.send()"""
         return render_to_response("indexAdmin.html", {"edificios": edificios, "edificioSeleccionado": edificioSeleccionado, "mensajesNoLeidos": mensajesNoLeidos, "error":error, "exito":exito, "per":per, "year":year}, RequestContext(request))
